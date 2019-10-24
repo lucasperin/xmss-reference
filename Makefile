@@ -16,6 +16,11 @@ TESTS = test/wots \
 		test/xmss_fast \
 		test/xmssmt \
 		test/xmssmt_fast \
+		test/wots_speed \
+		test/xmss_speed \
+		test/cs_10_42 \
+		test/cs_10_145 \
+
 
 UI = ui/xmss_keypair \
 	 ui/xmss_sign \
@@ -59,6 +64,21 @@ test/speed: test/speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 
 test/%: test/%.c $(SOURCES) $(OBJS) $(HEADERS)
 	$(CC) $(CFLAGS) -o $@ $(SOURCES) $< $(LDLIBS)
+
+test/%_fast: test/%.c $(SOURCES) $(OBJS) $(HEADERS)
+	$(CC) $(CFLAGS) -o $@ $(SOURCES) $< $(LDLIBS)
+
+
+test/xm_10_16: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DXMSS_VARIANT=\"XMSS-SHA2_10_256\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS)
+
+test/cs_10_42: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C42\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/cs_10_145: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -CONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C145\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+
 
 ui/xmss_%_fast: ui/%.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 	$(CC) $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS)

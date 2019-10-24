@@ -14,6 +14,11 @@ int main()
 
     /* For WOTS it doesn't matter if we use XMSS or XMSSMT. */
     xmss_parse_oid(&params, oid);
+	params.wots_w = 256;
+#ifdef CONSTANTSUM //TODO We can put these in params with the ifdef
+	params.wots_w     = 226;
+#endif
+	xmss_xmssmt_initialize_params(&params);
 
     unsigned char seed[params.n];
     unsigned char pub_seed[params.n];

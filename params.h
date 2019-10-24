@@ -28,6 +28,9 @@ typedef struct {
     unsigned int pk_bytes;
     unsigned long long sk_bytes;
     unsigned int bds_k;
+#ifdef CONSTANTSUM
+	int wots_s;
+#endif
 } xmss_params;
 
 /**

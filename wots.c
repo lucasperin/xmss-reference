@@ -6,6 +6,9 @@
 #include "wots.h"
 #include "hash_address.h"
 #include "params.h"
+#ifdef CONSTANTSUM
+#include "constant_sum.h"
+#endif
 
 /**
  * Helper method for pseudorandom key generation.
@@ -120,8 +123,14 @@ void wots_pkgen(const xmss_params *params,
 
     for (i = 0; i < params->wots_len; i++) {
         set_chain_addr(addr, i);
+#ifdef CONSTANTSUM
+        gen_chain(params, pk + i*params->n, pk + i*params->n,
+                  0, params->wots_w, pub_seed, addr);
+#else
         gen_chain(params, pk + i*params->n, pk + i*params->n,
                   0, params->wots_w - 1, pub_seed, addr);
+#endif
+
     }
 }
 
@@ -137,15 +146,28 @@ void wots_sign(const xmss_params *params,
     int lengths[params->wots_len];
     uint32_t i;
 
+#ifdef CONSTANTSUM
+	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
+	toConstantSum(I, params->wots_len, params->wots_w, params->wots_s, lengths);
+	/*for (i = 0; i < params->wots_len; i++)
+		gmp_printf("%d, ", lengths[i]);
+	gmp_printf("\n");*/
+#else
     chain_lengths(params, lengths, msg);
+#endif
 
     /* The WOTS+ private key is derived from the seed. */
     expand_seed(params, sig, seed);
 
     for (i = 0; i < params->wots_len; i++) {
         set_chain_addr(addr, i);
+#ifdef CONSTANTSUM
+        gen_chain(params, sig + i*params->n, sig + i*params->n,
+                  0, params->wots_s - lengths[i], pub_seed, addr); 
+#else
         gen_chain(params, sig + i*params->n, sig + i*params->n,
                   0, lengths[i], pub_seed, addr);
+#endif
     }
 }
 
@@ -160,12 +182,21 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
 {
     int lengths[params->wots_len];
     uint32_t i;
-
+#ifdef CONSTANTSUM
+	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
+	toConstantSum(I, params->wots_len, params->wots_w, params->wots_s, lengths);
+#else
     chain_lengths(params, lengths, msg);
+#endif
 
     for (i = 0; i < params->wots_len; i++) {
         set_chain_addr(addr, i);
+#ifdef CONSTANTSUM
+        gen_chain(params, pk + i*params->n, sig + i*params->n,
+                  params->wots_s - lengths[i], lengths[i], pub_seed, addr);
+#else
         gen_chain(params, pk + i*params->n, sig + i*params->n,
                   lengths[i], params->wots_w - 1 - lengths[i], pub_seed, addr);
+#endif
     }
 }
