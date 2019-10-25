@@ -50,6 +50,7 @@ static void gen_chain(const xmss_params *params,
     }
 }
 
+#ifndef CONSTANTSUM
 /**
  * base_w algorithm as described in draft.
  * Interprets an array of bytes as integers in base w.
@@ -103,6 +104,7 @@ static void chain_lengths(const xmss_params *params,
     base_w(params, lengths, params->wots_len1, msg);
     wots_checksum(params, lengths + params->wots_len1, lengths);
 }
+#endif
 
 /**
  * WOTS key generation. Takes a 32 byte seed for the private key, expands it to

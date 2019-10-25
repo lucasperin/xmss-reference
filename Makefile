@@ -8,7 +8,26 @@ HEADERS = params.h hash.h fips202.h hash_address.h randombytes.h wots.h xmss.h x
 SOURCES_FAST = $(subst xmss_core.c,xmss_core_fast.c,$(SOURCES))
 HEADERS_FAST = $(subst xmss_core.c,xmss_core_fast.c,$(HEADERS))
 
-TESTS = test/wots \
+BENCHMARK_FAST = test/xm_10_16  \
+				 test/xm_10_256 \
+				 test/cs_10_16 \
+				 test/cs_10_42 \
+				 test/cs_10_256 \
+				 test/cs_10_510 \
+				 test/cs_10_226 \
+
+BENCHMARK = $(BENCHMARK_FAST) \
+			test/xm_16_16  \
+			test/xm_16_256 \
+			test/cs_16_16 \
+			test/cs_16_42 \
+			test/cs_16_256 \
+			test/cs_16_510 \
+			test/cs_16_226 \
+
+
+TESTS = $(BENCHMARK) \
+		test/wots \
 		test/oid \
 		test/speed \
 		test/xmss_determinism \
@@ -18,8 +37,6 @@ TESTS = test/wots \
 		test/xmssmt_fast \
 		test/wots_speed \
 		test/xmss_speed \
-		test/cs_10_42 \
-		test/cs_10_145 \
 
 
 UI = ui/xmss_keypair \
@@ -42,7 +59,7 @@ ui: $(UI)
 
 test: $(TESTS:=.exec)
 
-.PHONY: clean test
+.PHONY: clean test benchmark
 
 test/%.exec: test/%
 	@$<
@@ -72,12 +89,44 @@ test/%_fast: test/%.c $(SOURCES) $(OBJS) $(HEADERS)
 test/xm_10_16: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 	$(CC) -DXMSS_VARIANT=\"XMSS-SHA2_10_256\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS)
 
+test/xm_10_256: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DXMSS_VARIANT=\"XMSS-SHA2_10_256_W256\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS)
+
+test/xm_16_16: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DXMSS_VARIANT=\"XMSS-SHA2_16_256\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS)
+
+test/xm_16_256: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DXMSS_VARIANT=\"XMSS-SHA2_16_256_W256\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS)
+
+test/cs_10_16: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C16\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
 test/cs_10_42: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C42\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
 
-test/cs_10_145: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
-	$(CC) -CONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C145\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+test/cs_10_256: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C256\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
 
+test/cs_10_510: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C510\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/cs_10_226: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C226\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/cs_16_16: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C16\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/cs_16_42: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C42\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/cs_16_256: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C256\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/cs_16_510: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C510\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/cs_16_226: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C226\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
 
 
 ui/xmss_%_fast: ui/%.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
@@ -95,3 +144,10 @@ ui/xmssmt_%: ui/%.c $(SOURCES) $(OBJS) $(HEADERS)
 clean:
 	-$(RM) $(TESTS)
 	-$(RM) $(UI)
+
+benchmark: $(BENCHMARK)
+	$(foreach var,$(BENCHMARK),./$(var);)
+
+benchmark_fast: $(BENCHMARK_FAST)
+	$(foreach var,$(BENCHMARK_FAST),./$(var);)
+

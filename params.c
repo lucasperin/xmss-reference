@@ -9,11 +9,20 @@ int xmss_str_to_oid(uint32_t *oid, const char *s)
     if (!strcmp(s, "XMSS-SHA2_10_256")) {
         *oid = 0x00000001;
     }
+	else if (!strcmp(s, "XMSS-SHA2_10_256_W256")) {
+        *oid = 0x00000011;
+    }
     else if (!strcmp(s, "XMSS-SHA2_16_256")) {
         *oid = 0x00000002;
     }
+    else if (!strcmp(s, "XMSS-SHA2_16_256_W256")) {
+        *oid = 0x00000012;
+    }
     else if (!strcmp(s, "XMSS-SHA2_20_256")) {
         *oid = 0x00000003;
+    }
+    else if (!strcmp(s, "XMSS-SHA2_20_256_W256")) {
+        *oid = 0x00000013;
     }
     else if (!strcmp(s, "XMSS-SHA2_10_512")) {
         *oid = 0x00000004;
@@ -43,10 +52,13 @@ int xmss_str_to_oid(uint32_t *oid, const char *s)
         *oid = 0x0000000c;
     }
 #ifdef CONSTANTSUM
+	else if (!strcmp(s, "XMSS-SHA2_10_256_C16")) {
+        *oid = 0x00000C01;
+    }
 	else if (!strcmp(s, "XMSS-SHA2_10_256_C42")) {
         *oid = 0x00000C11;
     }
-	else if (!strcmp(s, "XMSS-SHA2_10_256_C145")) {
+	else if (!strcmp(s, "XMSS-SHA2_10_256_C256")) {
         *oid = 0x00000C21;
     }
 	else if (!strcmp(s, "XMSS-SHA2_10_256_C510")) {
@@ -55,29 +67,20 @@ int xmss_str_to_oid(uint32_t *oid, const char *s)
 	else if (!strcmp(s, "XMSS-SHA2_10_256_C226")) {
         *oid = 0x00000C41;
     }
-    else if (!strcmp(s, "XMSS-SHA2_16_256_C42")) {
+	else if (!strcmp(s, "XMSS-SHA2_16_256_C16")) {
+        *oid = 0x00000C02;
+    }
+	else if (!strcmp(s, "XMSS-SHA2_16_256_C42")) {
         *oid = 0x00000C12;
     }
-    else if (!strcmp(s, "XMSS-SHA2_16_256_C145")) {
+	else if (!strcmp(s, "XMSS-SHA2_16_256_C256")) {
         *oid = 0x00000C22;
     }
-    else if (!strcmp(s, "XMSS-SHA2_16_256_C510")) {
+	else if (!strcmp(s, "XMSS-SHA2_16_256_C510")) {
         *oid = 0x00000C32;
     }
-    else if (!strcmp(s, "XMSS-SHA2_16_256_C226")) {
+	else if (!strcmp(s, "XMSS-SHA2_16_256_C226")) {
         *oid = 0x00000C42;
-    }
-    else if (!strcmp(s, "XMSS-SHA2_20_256_C42")) {
-        *oid = 0x00000C13;
-    }
-    else if (!strcmp(s, "XMSS-SHA2_20_256_C145")) {
-        *oid = 0x00000C23;
-    }
-    else if (!strcmp(s, "XMSS-SHA2_20_256_C510")) {
-        *oid = 0x00000C33;
-    }
-    else if (!strcmp(s, "XMSS-SHA2_20_256_C226")) {
-        *oid = 0x00000C43;
     }
 #endif
     else {
@@ -196,22 +199,23 @@ int xmss_parse_oid(xmss_params *params, const uint32_t oid)
         case 0x00000001:
         case 0x00000002:
         case 0x00000003:
+        case 0x00000011:
+        case 0x00000012:
+        case 0x00000013:
         case 0x00000004:
         case 0x00000005:
         case 0x00000006:
 #ifdef CONSTANTSUM
+        case 0x00000C01:
         case 0x00000C11:
         case 0x00000C21:
         case 0x00000C31:
         case 0x00000C41:
+        case 0x00000C02:
         case 0x00000C12:
         case 0x00000C22:
         case 0x00000C32:
         case 0x00000C42:
-        case 0x00000C13:
-        case 0x00000C23:
-        case 0x00000C33:
-        case 0x00000C43:
 #endif
             params->func = XMSS_SHA2;
             break;
@@ -232,23 +236,24 @@ int xmss_parse_oid(xmss_params *params, const uint32_t oid)
         case 0x00000001:
         case 0x00000002:
         case 0x00000003:
+        case 0x00000011:
+        case 0x00000012:
+        case 0x00000013:
 
         case 0x00000007:
         case 0x00000008:
         case 0x00000009:
 #ifdef CONSTANTSUM
+        case 0x00000C01:
         case 0x00000C11:
         case 0x00000C21:
         case 0x00000C31:
         case 0x00000C41:
+        case 0x00000C02:
         case 0x00000C12:
         case 0x00000C22:
         case 0x00000C32:
         case 0x00000C42:
-        case 0x00000C13:
-        case 0x00000C23:
-        case 0x00000C33:
-        case 0x00000C43:
 #endif
             params->n = 32;
             break;
@@ -268,10 +273,12 @@ int xmss_parse_oid(xmss_params *params, const uint32_t oid)
     }
     switch (oid) {
         case 0x00000001:
+        case 0x00000011:
         case 0x00000004:
         case 0x00000007:
         case 0x0000000a:
 #ifdef CONSTANTSUM
+        case 0x00000C01:
         case 0x00000C11:
         case 0x00000C21:
         case 0x00000C31:
@@ -281,10 +288,12 @@ int xmss_parse_oid(xmss_params *params, const uint32_t oid)
             break;
 
         case 0x00000002:
+        case 0x00000012:
         case 0x00000005:
         case 0x00000008:
         case 0x0000000b:
 #ifdef CONSTANTSUM
+        case 0x00000C02:
         case 0x00000C12:
         case 0x00000C22:
         case 0x00000C32:
@@ -294,15 +303,10 @@ int xmss_parse_oid(xmss_params *params, const uint32_t oid)
             break;
 
         case 0x00000003:
+        case 0x00000013:
         case 0x00000006:
         case 0x00000009:
         case 0x0000000c:
-#ifdef CONSTANTSUM
-        case 0x00000C13:
-        case 0x00000C23:
-        case 0x00000C33:
-        case 0x00000C43:
-#endif
             params->full_height = 20;
 
             break;
@@ -312,32 +316,35 @@ int xmss_parse_oid(xmss_params *params, const uint32_t oid)
 
     params->d = 1;
     params->wots_w = 16;
-#ifdef CONSTANTSUM
     switch (oid) {
+        case 0x00000011:
+        case 0x00000012:
+        case 0x00000013:
+			params->wots_w = 256;
+			break;
+#ifdef CONSTANTSUM
+        case 0x00000C01:
+        case 0x00000C02:
+			params->wots_w = 16;
+			break;
         case 0x00000C11:
         case 0x00000C12:
-        case 0x00000C13:
 			params->wots_w = 42;
 			break;
         case 0x00000C21:
         case 0x00000C22:
-        case 0x00000C23:
-			params->wots_w = 145;
+			params->wots_w = 256;
 			break;
         case 0x00000C31:
         case 0x00000C32:
-        case 0x00000C33:
 			params->wots_w = 510;
 			break;
         case 0x00000C41:
         case 0x00000C42:
-        case 0x00000C43:
 			params->wots_w = 226;
 			break;
-        default:
-            return -1;
-    }
 #endif
+    }
 
     // TODO figure out sensible and legal values for this based on the above
     params->bds_k = 0;
@@ -570,16 +577,30 @@ int xmss_xmssmt_initialize_params(xmss_params *params)
         params->wots_len2 = 5;
     }
     else if (params->wots_w == 16) {
+#ifdef CONSTANTSUM
+        params->wots_log_w = 5;
+        params->wots_len1 = 67;
+        params->wots_len2 = 0;
+		params->wots_s = 380;
+#else
         params->wots_log_w = 4;
         params->wots_len1 = 8 * params->n / params->wots_log_w;
         /* len_2 = floor(log(len_1 * (w - 1)) / log(w)) + 1 */
         params->wots_len2 = 3;
+#endif
     }
     else if (params->wots_w == 256) {
+#ifdef CONSTANTSUM
+        params->wots_log_w = 9;
+        params->wots_len1 = 34;
+        params->wots_len2 = 0;
+		params->wots_s = 3099;
+#else
         params->wots_log_w = 8;
         params->wots_len1 = 8 * params->n / params->wots_log_w;
         /* len_2 = floor(log(len_1 * (w - 1)) / log(w)) + 1 */
         params->wots_len2 = 2;
+#endif
     }
 #ifdef CONSTANTSUM
     else if (params->wots_w == 42) {
@@ -587,12 +608,6 @@ int xmss_xmssmt_initialize_params(xmss_params *params)
         params->wots_len1 = 67;
         params->wots_len2 = 0;
 		params->wots_s = 341;
-    }
-    else if (params->wots_w == 145) {
-        params->wots_log_w = 8;
-        params->wots_len1 = 45;
-        params->wots_len2 = 0;
-		params->wots_s = 953;
     }
     else if (params->wots_w == 510) {
         params->wots_log_w = 9;
