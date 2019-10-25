@@ -151,9 +151,9 @@ void wots_sign(const xmss_params *params,
 #ifdef CONSTANTSUM
 	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
 	toConstantSum(I, params->wots_len, params->wots_w, params->wots_s, lengths);
-	/*for (i = 0; i < params->wots_len; i++)
-		gmp_printf("%d, ", lengths[i]);
-	gmp_printf("\n");*/
+#ifdef BINARYSEARCH
+		short aux;
+#endif
 #else
     chain_lengths(params, lengths, msg);
 #endif
@@ -166,6 +166,10 @@ void wots_sign(const xmss_params *params,
 #ifdef CONSTANTSUM
         gen_chain(params, sig + i*params->n, sig + i*params->n,
                   0, params->wots_s - lengths[i], pub_seed, addr); 
+#ifdef BINARYSEARCH
+		aux = (short)lengths[i];
+		memcpy(sig + params->wots_len*params->n + 2*i, &aux, 2);//TODO Check if this is ok
+#endif
 #else
         gen_chain(params, sig + i*params->n, sig + i*params->n,
                   0, lengths[i], pub_seed, addr);
@@ -186,7 +190,18 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
     uint32_t i;
 #ifdef CONSTANTSUM
 	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
+#ifdef BINARYSEARCH
+	short aux;
+    for (i = 0; i < params->wots_len; i++) {
+		memcpy(&aux, sig + params->wots_len*params->n+ 2*i, 2);
+		lengths[i] = aux;
+	}
+	if(check_encoding(I, params->wots_len, params->wots_w, params->wots_s, lengths)){
+		return;
+	}
+#else
 	toConstantSum(I, params->wots_len, params->wots_w, params->wots_s, lengths);
+#endif
 #else
     chain_lengths(params, lengths, msg);
 #endif
@@ -202,3 +217,4 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
 #endif
     }
 }
+

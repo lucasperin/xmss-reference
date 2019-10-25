@@ -626,7 +626,11 @@ int xmss_xmssmt_initialize_params(xmss_params *params)
         return -1;
     }
     params->wots_len = params->wots_len1 + params->wots_len2;
+#if defined(CONSTANTSUM) && (BINARYSEARCH)
+    params->wots_sig_bytes = params->wots_len * params->n + params->wots_len*2;
+#else
     params->wots_sig_bytes = params->wots_len * params->n;
+#endif
 
     if (params->d == 1) {  // Assume this is XMSS, not XMSS^MT
         /* In XMSS, always use fixed 4 bytes for index_bytes */

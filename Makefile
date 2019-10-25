@@ -15,6 +15,11 @@ BENCHMARK_FAST = test/xm_10_16  \
 				 test/cs_10_256 \
 				 test/cs_10_510 \
 				 test/cs_10_226 \
+				 test/bs_10_16 \
+				 test/bs_10_42 \
+				 test/bs_10_256 \
+				 test/bs_10_510 \
+				 test/bs_10_226 \
 
 BENCHMARK = $(BENCHMARK_FAST) \
 			test/xm_16_16  \
@@ -24,6 +29,11 @@ BENCHMARK = $(BENCHMARK_FAST) \
 			test/cs_16_256 \
 			test/cs_16_510 \
 			test/cs_16_226 \
+			test/bs_16_16 \
+			test/bs_16_42 \
+			test/bs_16_256 \
+			test/bs_16_510 \
+			test/bs_16_226 \
 
 
 TESTS = $(BENCHMARK) \
@@ -127,6 +137,38 @@ test/cs_16_510: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 
 test/cs_16_226: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 	$(CC) -DCONSTANTSUM -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C226\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+
+
+test/bs_10_16: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C16\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/bs_10_42: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C42\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/bs_10_256: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C256\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/bs_10_510: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C510\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/bs_10_226: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_10_256_C226\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/bs_16_16: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C16\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/bs_16_42: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C42\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/bs_16_256: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C256\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/bs_16_510: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C510\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/bs_16_226: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C226\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
 
 
 ui/xmss_%_fast: ui/%.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
