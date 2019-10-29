@@ -9,17 +9,17 @@ SOURCES_FAST = $(subst xmss_core.c,xmss_core_fast.c,$(SOURCES))
 HEADERS_FAST = $(subst xmss_core.c,xmss_core_fast.c,$(HEADERS))
 
 BENCHMARK_FAST = test/xm_10_16  \
-				 test/xm_10_256 \
 				 test/cs_10_16 \
-				 test/cs_10_42 \
-				 test/cs_10_256 \
-				 test/cs_10_510 \
-				 test/cs_10_226 \
 				 test/bs_10_16 \
+				 test/cs_10_42 \
 				 test/bs_10_42 \
+				 test/xm_10_256 \
+				 test/cs_10_256 \
 				 test/bs_10_256 \
+				 test/cs_10_510 \
 				 test/bs_10_510 \
 				 test/bs_10_226 \
+				 test/cs_10_226 \
 
 BENCHMARK = $(BENCHMARK_FAST) \
 			test/xm_16_16  \
