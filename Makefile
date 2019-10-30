@@ -8,6 +8,11 @@ HEADERS = params.h hash.h fips202.h hash_address.h randombytes.h wots.h xmss.h x
 SOURCES_FAST = $(subst xmss_core.c,xmss_core_fast.c,$(SOURCES))
 HEADERS_FAST = $(subst xmss_core.c,xmss_core_fast.c,$(HEADERS))
 
+BENCHMARK_ENC = test/enc \
+				test/enc_bs \
+				test/enc_cky \
+				test/enc_ckyi \
+
 BENCHMARK_FAST = test/xm_10_16  \
 				 test/cs_10_16 \
 				 test/bs_10_16 \
@@ -18,10 +23,11 @@ BENCHMARK_FAST = test/xm_10_16  \
 				 test/bs_10_256 \
 				 test/cs_10_510 \
 				 test/bs_10_510 \
-				 test/bs_10_226 \
 				 test/cs_10_226 \
+				 test/bs_10_226 \
 
 BENCHMARK = $(BENCHMARK_FAST) \
+			$(BENCHMARK_ENC) \
 			test/xm_16_16  \
 			test/xm_16_256 \
 			test/cs_16_16 \
@@ -47,6 +53,7 @@ TESTS = $(BENCHMARK) \
 		test/xmssmt_fast \
 		test/wots_speed \
 		test/xmss_speed \
+		test/enc \
 
 
 UI = ui/xmss_keypair \
@@ -171,6 +178,19 @@ test/bs_16_226: test/xmss_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DXMSS_VARIANT=\"XMSS-SHA2_16_256_C226\" $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
 
 
+test/enc: test/encoding_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/enc_bs: test/encoding_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/enc_cky: test/encoding_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DCKY $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+test/enc_ckyi: test/encoding_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
+	$(CC) -DCONSTANTSUM -DCKYI $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+
+
 ui/xmss_%_fast: ui/%.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 	$(CC) $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS)
 
@@ -192,4 +212,7 @@ benchmark: $(BENCHMARK)
 
 benchmark_fast: $(BENCHMARK_FAST)
 	$(foreach var,$(BENCHMARK_FAST),./$(var);)
+
+benchmark_enc: $(BENCHMARK_ENC)
+	$(foreach var,$(BENCHMARK_ENC),./$(var);)
 

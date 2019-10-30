@@ -98,7 +98,67 @@ static int check_encoding(mpz_t I, int32_t t, int32_t n, int32_t s,
 }
 
 #else
+#ifdef CKYI
+/**
+ * Constan-sum encoding function. Encodes an integer 0 <= i <=2^m
+ * into t partitions of integers from 0 to n and summing s. Writes
+ * the encoding into output. Algorithm as presented in CKY, with 
+ * inverted search.
+ */
+static void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s, 
+						  int *output) 
+{
+	if (t == 1){
+		output[0] = s;
+		return;
+	}
+	int32_t k = 0;
+	mpz_t left;	mpz_init(left);
+	mpz_t right; binomial(s+t-2, s, right);
+	mpz_t aux; mpz_init(aux); mpz_set(aux,right);
+	while ( !( mpz_cmp(I,left)>=0 && mpz_cmp(I,right)<0) ) {
+		k++; 
+		mpz_set(left,right);
+		mpz_mul_ui(aux, aux, s-k+1);
+		mpz_divexact_ui(aux, aux, (s-k+1)+t-2);
+		mpz_add(right,right,aux);
+	}
+	output[t-1] = k;
+	mpz_sub(I,I,left);
+	toConstantSum(I, t - 1, n, s-k, output);
+}
+#else
+#ifdef CKY
 
+/**
+ * Constan-sum encoding function. Encodes an integer 0 <= i <=2^m
+ * into t partitions of integers from 0 to n and summing s. Writes
+ * the encoding into output. Algorithm as presented in CKY.
+ */
+static void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s, 
+						  int *output) 
+{
+	if (t == 1){
+		output[0] = s;
+		return;
+	}
+	int32_t k = 0;
+	mpz_t left;	mpz_init(left);
+	mpz_t right; mpz_init(right); mpz_set_ui(right, 1);
+	mpz_t aux; mpz_init(aux); mpz_set(aux,right);
+	while ( !( mpz_cmp(I,left)>=0 && mpz_cmp(I,right)<0) ) {
+		k++; 
+		mpz_set(left,right);
+		mpz_mul_ui(aux, aux, k+t-2);
+		mpz_divexact_ui(aux, aux, k);
+		mpz_add(right,right,aux);
+	}
+	output[t-1] = s-k;
+	mpz_sub(I,I,left);
+	toConstantSum(I, t - 1, n, k, output);
+}
+
+#else
 /**
  * Computes cardinality of the set of t-tuples with values ranging
  * from 0 to n that sum s.
@@ -135,7 +195,7 @@ static void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s,
 		output[0] = s;
 		return;
 	}
-	uint32_t k = 0;
+	int32_t k = 0;
 	mpz_t aux;
 	mpz_init(aux);
 	mpz_t left;
@@ -153,6 +213,7 @@ static void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s,
 	toConstantSum(I, t - 1, n, s-k, output);
 }
 
-
+#endif
+#endif
 #endif
 #endif

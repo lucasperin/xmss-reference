@@ -165,7 +165,7 @@ void wots_sign(const xmss_params *params,
         set_chain_addr(addr, i);
 #ifdef CONSTANTSUM
         gen_chain(params, sig + i*params->n, sig + i*params->n,
-                  0, params->wots_s - lengths[i], pub_seed, addr); 
+                  0, params->wots_w - lengths[i], pub_seed, addr); 
 #ifdef BINARYSEARCH
 		aux = (short)lengths[i];
 		memcpy(sig + params->wots_len*params->n + 2*i, &aux, 2);//TODO Check if this is ok
@@ -210,7 +210,7 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
         set_chain_addr(addr, i);
 #ifdef CONSTANTSUM
         gen_chain(params, pk + i*params->n, sig + i*params->n,
-                  params->wots_s - lengths[i], lengths[i], pub_seed, addr);
+                  params->wots_w - lengths[i], lengths[i], pub_seed, addr);
 #else
         gen_chain(params, pk + i*params->n, sig + i*params->n,
                   lengths[i], params->wots_w - 1 - lengths[i], pub_seed, addr);
