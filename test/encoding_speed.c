@@ -8,17 +8,7 @@
 #define MLEN 32
 
 #ifndef REPETITIONS
-    #define REPETITIONS 10
-#endif
-
-#ifndef T
-    #define T 34
-#endif
-#ifndef N
-    #define N 256
-#endif
-#ifndef S
-    #define S 3099
+    #define REPETITIONS 100
 #endif
 
 
@@ -85,7 +75,11 @@ int main()
 	(void)check_encoding; //Surpress warning if not used
 	printf("BS t=%d n=%d s=%d\n", T,N,S);
 #else
+#ifdef CACHED
+	printf("MCS t=%d n=%d s=%d\n", T,N,S);
+#else
 	printf("CS t=%d n=%d s=%d\n", T,N,S);
+#endif
 #endif
 #endif
 #endif
@@ -99,6 +93,15 @@ int main()
 		randombytes(m, MLEN);
 		mpz_init(I[i]); mpz_import(I[i], MLEN,1,1,0,0, m);
 	}
+
+#ifdef CACHED
+	int b,s;
+	for(b = 1; b < T; b++) {
+		for(s = 0; s<=S; s++){
+			constantSumLen(b,N,s,cache[b-1][s]);
+		}
+	}
+#endif
 
 	int encoding[REPETITIONS][T];
     for (i = 0; i < REPETITIONS; i++) {

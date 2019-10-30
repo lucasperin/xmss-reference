@@ -2,6 +2,16 @@
 #define WOTS_CONSTANTSUM_H
 #include "gmp.h"
 
+#ifndef T
+    #define T 34
+#endif
+#ifndef N
+    #define N 256
+#endif
+#ifndef S
+    #define S 3099
+#endif
+
 /**
  * Binomial coefficient n choose k for arbitrary precisions
  * integers, using GMP. Do not use uint, since it
@@ -183,6 +193,11 @@ static void constantSumLen(const int32_t t, const int32_t n, const int32_t s,
 	}
 }
 
+
+#ifdef CACHED
+static mpz_t cache[T-1][S+1];
+#endif
+
 /**
  * Constan-sum encoding function. Encodes an integer 0 <= i <=2^m
  * into t partitions of integers from 0 to n and summing s. Writes
@@ -196,16 +211,19 @@ static void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s,
 		return;
 	}
 	int32_t k = 0;
-	mpz_t aux;
-	mpz_init(aux);
-	mpz_t left;
-	mpz_init(left);
-	mpz_t right;
+	mpz_t aux; mpz_init(aux);
+	mpz_t left;	mpz_init(left);
+	mpz_t right; mpz_init(right);
 	constantSumLen(t - 1, n, s, right);
 	while ( !( mpz_cmp(I,left)>=0 && mpz_cmp(I,right)<0) ) {
 		k++; 
 		mpz_set(left,right);
+#ifdef CACHED
+		//mpz_set(aux, cache[t-2][s-k]);
+		mpz_set(aux, *(*(cache +t-2)+s-k));
+#else
 		constantSumLen(t-1,n,s-k,aux);
+#endif
 		mpz_add(right,right,aux);
 	}
 	output[t-1] = k;
