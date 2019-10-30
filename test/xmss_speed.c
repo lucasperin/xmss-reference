@@ -100,16 +100,23 @@ int main()
     XMSS_PARSE_OID(&params, oid);
 	
 #ifdef CONSTANTSUM
+#ifdef BINARYSEARCH
+	printf("Params: t=%d n=%d s=%d\n usign binary search!\n", params.wots_len, params.wots_w, params.wots_s);
+#else
 	printf("Params: t=%d n=%d s=%d\n", params.wots_len, params.wots_w, params.wots_s);
+#endif
 #else
 	printf("Params: t=%d n=%d\n", params.wots_len, params.wots_w);
 #endif
 
     unsigned char pk[XMSS_OID_LEN + params.pk_bytes];
     unsigned char sk[XMSS_OID_LEN + params.sk_bytes];
-    unsigned char *m = malloc(XMSS_MLEN);
+    /*unsigned char *m = malloc(XMSS_MLEN);
     unsigned char *sm = malloc(params.sig_bytes + XMSS_MLEN);
-    unsigned char *mout = malloc(params.sig_bytes + XMSS_MLEN);
+    unsigned char *mout = malloc(params.sig_bytes + XMSS_MLEN);*/
+    unsigned char m[XMSS_SIGNATURES][XMSS_MLEN];
+    unsigned char sm[XMSS_SIGNATURES][params.sig_bytes + XMSS_MLEN];
+    unsigned char mout[XMSS_SIGNATURES][params.sig_bytes + XMSS_MLEN];
     unsigned long long smlen;
     unsigned long long mlen;
 
@@ -118,7 +125,9 @@ int main()
     struct timespec start, stop;
     double result;
 
-    randombytes(m, XMSS_MLEN);
+    for (i = 0; i < XMSS_SIGNATURES; i++) {
+		randombytes(m[i], XMSS_MLEN);
+	}
 
     printf("Benchmarking variant %s\n", XMSS_VARIANT);
 
@@ -136,15 +145,16 @@ int main()
 
     for (i = 0; i < XMSS_SIGNATURES; i++) {
         t[i] = cpucycles();
-        XMSS_SIGN(sk, sm, &smlen, m, XMSS_MLEN);
+        XMSS_SIGN(sk, sm[i], &smlen, m[i], XMSS_MLEN);
     }
     print_results(t, XMSS_SIGNATURES);
 
     printf("Verifying %d signatures..\n", XMSS_SIGNATURES);
 
+	randombytes(m[0], XMSS_MLEN);
     for (i = 0; i < XMSS_SIGNATURES; i++) {
         t[i] = cpucycles();
-        ret |= XMSS_SIGN_OPEN(mout, &mlen, sm, smlen, pk);
+        ret |= XMSS_SIGN_OPEN(mout[i], &mlen, sm[i], smlen, pk);
     }
     print_results(t, XMSS_SIGNATURES);
 
@@ -155,11 +165,6 @@ int main()
     printf("Signature size: %d (%.2f KiB)\n", params.sig_bytes, params.sig_bytes / 1024.0);
     printf("Public key size: %d (%.2f KiB)\n", params.pk_bytes, params.pk_bytes / 1024.0);
     printf("Secret key size: %llu (%.2f KiB)\n", params.sk_bytes, params.sk_bytes / 1024.0);
-
-    free(m);
-    free(sm);
-    free(mout);
-    free(t);
 
     return ret;
 }
