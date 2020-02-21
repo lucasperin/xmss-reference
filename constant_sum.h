@@ -3,13 +3,13 @@
 #include "gmp.h"
 
 #ifndef T
-    #define T 45
+    #define T 34
 #endif
 #ifndef N
-    #define N 58
+    #define N 226
 #endif
 #ifndef S
-    #define S 1205
+    #define S 3643
 #endif
 
 /**
@@ -25,7 +25,6 @@ static void binomial(int32_t n, int32_t k, mpz_t out)
 	mpz_bin_uiui(out, n, k);
 }
 
-#ifdef BINARYSEARCH
 /**
  * Ranking function, returns the j-th rank for params,
  * used to find bounds in the constant-sum encoding.
@@ -51,11 +50,10 @@ static void rank(int32_t t, int32_t n, int32_t s, int32_t j, mpz_t out) {
 	}
 }
 
+#if defined(BCACHED) || defined (VCACHED)
+static mpz_t bcache[T][S+1][N+1];
 
-#ifdef BCACHED
-static mpz_t cache[T][S+1][N+1];
-
-static void load_cache(const int32_t t, const int32_t n, const int32_t s)
+static void load_bcache(const int32_t t, const int32_t n, const int32_t s)
 {
 	int b,z,j;
 	for(b = 0; b < t; b++) {
@@ -63,13 +61,47 @@ static void load_cache(const int32_t t, const int32_t n, const int32_t s)
 			#pragma omp parallel for
 			for(j = 0; j<= n; j++){
 				if(j<=z)
-					rank(b+1,n,z,j,cache[b][z][j]);
+					rank(b+1,n,z,j,bcache[b][z][j]);
 			}
 		}
 	}
 
 }
 #endif
+
+/**
+ * Given a constant-sum encoding and the original digest, verifies
+ * if encoding corresponds to the digest, similar to a checksum.
+ */
+static int check_encoding(mpz_t I, int32_t t, int32_t n, int32_t s, 
+						  int *encoding) 
+{
+	mpz_t left;
+	mpz_t right;
+	int k = 0;
+	for(int b = 0; b <t; b++) {
+		k = encoding[t-b-1];
+#ifdef VCACHED
+		(void)n;
+		if(k == 0) {
+			mpz_init(left);
+		} else {
+			mpz_set(left, *(*(*(bcache +t-b-1)+s)+k-1 ));
+		}
+		mpz_set(right, *(*(*(bcache +t-b-1)+s)+k));
+#else
+		rank(t-b, n, s, k-1, left);
+		rank(t-b, n, s, k, right);
+#endif
+		if( mpz_cmp(left,I)>0 ) { return -1; }
+		if( mpz_cmp(right,I)<=0 ) { return -1; }
+		s -= encoding[t-b-1];
+		mpz_sub(I,I,left);
+	}
+	return 1;
+}
+
+#ifdef BINARYSEARCH
 
 /**
  * Constan-sum encoding function using binary search. Encodes an 
@@ -89,7 +121,7 @@ static void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s,
 			step = count/2;
 			it = it + step;
 #ifdef BCACHED
-			mpz_set(keep, *(*(*(cache +t-b-1)+s)+it));
+			mpz_set(keep, *(*(*(bcache +t-b-1)+s)+it));
 #else
 			rank(t-b, n, s, it, keep);
 #endif
@@ -107,38 +139,6 @@ static void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s,
 			s -= k;
 		}
 	}
-}
-
-/**
- * Given a constant-sum encoding and the original digest, verifies
- * if encoding corresponds to the digest, similar to a checksum.
- */
-static int check_encoding(mpz_t I, int32_t t, int32_t n, int32_t s, 
-						  int *encoding) 
-{
-	mpz_t left;
-	mpz_t right;
-	int k = 0;
-	for(int b = 0; b <t; b++) {
-		k = encoding[t-b-1];
-#ifdef VCACHED
-		(void)n;
-		if(k == 0) {
-			mpz_init(left);
-		} else {
-			mpz_set(left, *(*(*(cache +t-b-1)+s)+k-1 ));
-		}
-		mpz_set(right, *(*(*(cache +t-b-1)+s)+k));
-#else
-		rank(t-b, n, s, k-1, left);
-		rank(t-b, n, s, k, right);
-#endif
-		if( mpz_cmp(left,I)>0 ) { return -1; }
-		if( mpz_cmp(right,I)<=0 ) { return -1; }
-		s -= encoding[t-b-1];
-		mpz_sub(I,I,left);
-	}
-	return 1;
 }
 
 #else

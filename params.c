@@ -578,10 +578,15 @@ int xmss_xmssmt_initialize_params(xmss_params *params)
     }
     else if (params->wots_w == 16) {
 #ifdef CONSTANTSUM
-        params->wots_log_w = 5;
+        /*params->wots_log_w = 5;
         params->wots_len1 = 67;
         params->wots_len2 = 0;
-		params->wots_s = 380;
+		params->wots_s = 380;*/
+        params->wots_w = 15;
+		params->wots_log_w = 5;
+        params->wots_len1 = 67;
+        params->wots_len2 = 0;
+		params->wots_s = 400;
 #else
         params->wots_log_w = 4;
         params->wots_len1 = 8 * params->n / params->wots_log_w;
@@ -626,7 +631,7 @@ int xmss_xmssmt_initialize_params(xmss_params *params)
         return -1;
     }
     params->wots_len = params->wots_len1 + params->wots_len2;
-#if defined(CONSTANTSUM) && (BINARYSEARCH)
+#if defined(CONSTANTSUM) && (VERIFY)
     params->wots_sig_bytes = params->wots_len * params->n + params->wots_len*2;
 #else
     params->wots_sig_bytes = params->wots_len * params->n;

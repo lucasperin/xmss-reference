@@ -5,6 +5,7 @@
 #include "../xmss.h"
 #include "../params.h"
 #include "../randombytes.h"
+#include "../constant_sum.h"
 
 #define XMSS_MLEN 32
 
@@ -80,6 +81,7 @@ static void print_results(unsigned long long *t, size_t tlen)
 
 int main()
 {
+	printf("-----------------------\n");
     /* Make stdout buffer more responsive. */
     setbuf(stdout, NULL);
 
@@ -100,13 +102,34 @@ int main()
     XMSS_PARSE_OID(&params, oid);
 	
 #ifdef CONSTANTSUM
+	(void)check_encoding; //Surpress warning if not used
+	printf("##### CONSTANT SUM\n");
+	printf("##### PARAMS: t=%d n=%d s=%d\n", params.wots_len, params.wots_w, params.wots_s);
 #ifdef BINARYSEARCH
-	printf("Params: t=%d n=%d s=%d\n usign binary search!\n", params.wots_len, params.wots_w, params.wots_s);
-#else
-	printf("Params: t=%d n=%d s=%d\n", params.wots_len, params.wots_w, params.wots_s);
+	printf("##### Binary Search!\n");
+#endif
+#ifdef CACHED
+	printf("##### Using memoization!\n");
+#endif
+#ifdef VERIFY
+	printf("##### Using V !\n");
+#endif
+#ifdef BCACHED
+	printf("##### Using BS memoization!\n");
+#endif
+#ifdef VCACHED
+	printf("##### Using V memoization!\n");
 #endif
 #else
-	printf("Params: t=%d n=%d\n", params.wots_len, params.wots_w);
+	printf("##### rfc-XMSS \n ##### Params: t=%d n=%d\n", params.wots_len, params.wots_w);
+#endif
+
+#if defined(CACHED)
+	load_cache(params.wots_len,params.wots_w,params.wots_s);
+#endif
+
+#if defined(BCACHED) || defined(VCACHED)
+	load_bcache(params.wots_len,params.wots_w,params.wots_s);
 #endif
 
     unsigned char pk[XMSS_OID_LEN + params.pk_bytes];
@@ -166,5 +189,6 @@ int main()
     printf("Public key size: %d (%.2f KiB)\n", params.pk_bytes, params.pk_bytes / 1024.0);
     printf("Secret key size: %llu (%.2f KiB)\n", params.sk_bytes, params.sk_bytes / 1024.0);
 
+	printf("-----------------------\n");
     return ret;
 }

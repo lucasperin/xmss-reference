@@ -96,8 +96,12 @@ int main()
 		mpz_init(V[i]); mpz_import(V[i], MLEN,1,1,0,0, m);
 	}
 
-#if defined(CACHED) || defined(BCACHED) || defined(VCACHED)
+#if defined(CACHED)
 	load_cache(T,N,S);
+#endif
+
+#if defined(BCACHED)
+	load_bcache(T,N,S);
 #endif
 
 	int encoding[REPETITIONS][T];

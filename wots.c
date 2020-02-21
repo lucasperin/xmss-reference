@@ -151,7 +151,7 @@ void wots_sign(const xmss_params *params,
 #ifdef CONSTANTSUM
 	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
 	toConstantSum(I, params->wots_len, params->wots_w, params->wots_s, lengths);
-#ifdef BINARYSEARCH
+#ifdef VERIFY
 		short aux;
 #endif
 #else
@@ -166,7 +166,7 @@ void wots_sign(const xmss_params *params,
 #ifdef CONSTANTSUM
         gen_chain(params, sig + i*params->n, sig + i*params->n,
                   0, params->wots_w - lengths[i], pub_seed, addr); 
-#ifdef BINARYSEARCH
+#ifdef VERIFY
 		aux = (short)lengths[i];
 		memcpy(sig + params->wots_len*params->n + 2*i, &aux, 2);//TODO This appends the encoding to the signature. Used for faster verification.
 #endif
@@ -190,7 +190,7 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
     uint32_t i;
 #ifdef CONSTANTSUM
 	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
-#ifdef BINARYSEARCH
+#ifdef VERIFY
 	short aux;
     for (i = 0; i < params->wots_len; i++) {
 		memcpy(&aux, sig + params->wots_len*params->n+ 2*i, 2);
