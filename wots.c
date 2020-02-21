@@ -168,7 +168,7 @@ void wots_sign(const xmss_params *params,
                   0, params->wots_w - lengths[i], pub_seed, addr); 
 #ifdef BINARYSEARCH
 		aux = (short)lengths[i];
-		memcpy(sig + params->wots_len*params->n + 2*i, &aux, 2);//TODO Check if this is ok
+		memcpy(sig + params->wots_len*params->n + 2*i, &aux, 2);//TODO This appends the encoding to the signature. Used for faster verification.
 #endif
 #else
         gen_chain(params, sig + i*params->n, sig + i*params->n,
