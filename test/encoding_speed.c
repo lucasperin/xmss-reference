@@ -88,19 +88,16 @@ int main()
 
     unsigned char *m = malloc(MLEN);
 	mpz_t I[REPETITIONS];
+	mpz_t V[REPETITIONS];
 	printf("setup..");
     for (i = 0; i < REPETITIONS; i++) {
 		randombytes(m, MLEN);
 		mpz_init(I[i]); mpz_import(I[i], MLEN,1,1,0,0, m);
+		mpz_init(V[i]); mpz_import(V[i], MLEN,1,1,0,0, m);
 	}
 
-#ifdef CACHED
-	int b,s;
-	for(b = 1; b < T; b++) {
-		for(s = 0; s<=S; s++){
-			constantSumLen(b,N,s,cache[b-1][s]);
-		}
-	}
+#if defined(CACHED) || defined(BCACHED) || defined(VCACHED)
+	load_cache(T,N,S);
 #endif
 
 	int encoding[REPETITIONS][T];
@@ -113,8 +110,9 @@ int main()
 	printf("VF t=%d n=%d s=%d\n", T,N,S);
     for (i = 0; i < REPETITIONS; i++) {
         t[i] = cpucycles();
-		ret |= check_encoding(I[i], T, N, S, encoding[i]);
+		ret |= check_encoding(V[i], T, N, S, encoding[i]);
     }
+	printf("Ver status %d\n", ret);
     print_results(t, REPETITIONS);
 #endif
 

@@ -3,13 +3,13 @@
 #include "gmp.h"
 
 #ifndef T
-    #define T 34
+    #define T 45
 #endif
 #ifndef N
-    #define N 256
+    #define N 58
 #endif
 #ifndef S
-    #define S 3099
+    #define S 1205
 #endif
 
 /**
@@ -39,9 +39,9 @@ static void rank(int32_t t, int32_t n, int32_t s, int32_t j, mpz_t out) {
 	mpz_t b;
 	mpz_t c;
 	for(i = 0; i <= k; i++ ) { 
-		binomial(t,i,a);
-		binomial(s - (n+1)*i + t, t, b);
-		binomial(s - (n+1)*i + t -1 -j, t, c);
+		binomial(t-1,i,a);
+		binomial(s - (n+1)*i + t-1, t-1, b);
+		binomial(s - (n+1)*i + t -2 -j, t-1, c);
 		mpz_sub(b,b,c);
 		if(i%2==0){
 			mpz_addmul(out, a,b);
@@ -50,6 +50,26 @@ static void rank(int32_t t, int32_t n, int32_t s, int32_t j, mpz_t out) {
 		}
 	}
 }
+
+
+#ifdef BCACHED
+static mpz_t cache[T][S+1][N+1];
+
+static void load_cache(const int32_t t, const int32_t n, const int32_t s)
+{
+	int b,z,j;
+	for(b = 0; b < t; b++) {
+		for(z = 0; z<=s; z++){
+			#pragma omp parallel for
+			for(j = 0; j<= n; j++){
+				if(j<=z)
+					rank(b+1,n,z,j,cache[b][z][j]);
+			}
+		}
+	}
+
+}
+#endif
 
 /**
  * Constan-sum encoding function using binary search. Encodes an 
@@ -61,22 +81,26 @@ static void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s,
 {
 	int count, k, it, step, b;
 	mpz_t keep;
-	for (b = 1; b <= t; b++ ) {
+	for (b = 0; b < t; b++ ) {
 		count = ( n < s)?n:s;
 		k = 0;
 		while ( count > 0 ) {
 			it = k;
 			step = count/2;
 			it = it + step;
+#ifdef BCACHED
+			mpz_set(keep, *(*(*(cache +t-b-1)+s)+it));
+#else
 			rank(t-b, n, s, it, keep);
-			if ( mpz_cmp(keep,I)<0) {
+#endif
+			if ( mpz_cmp(I,keep)>=0) {
 				k = ++it;
 				count -= step + 1;
 			} else {
 				count = step;
 			}
 		}
-		output[b-1] = k;
+		output[t-b-1] = k;
 		if(k>0) {
 			rank(t-b, n, s, k-1, keep);
 			mpz_sub(I,I,keep);
@@ -94,17 +118,27 @@ static int check_encoding(mpz_t I, int32_t t, int32_t n, int32_t s,
 {
 	mpz_t left;
 	mpz_t right;
-	for(int r = 1; r <=t; r++) {
-		rank(t-r, n, s, encoding[r-1]-1, left);
-		rank(t-r, n, s, encoding[r-1], right);
-		//if( I < left ) { return -1; }
-		//if( I > right ) { return -1; }
-		if( mpz_cmp(I, left)<0 ) { return -1; }
-		if( mpz_cmp(I, right)>0 ) { return -1; }
-		s -= encoding[r-1];
+	int k = 0;
+	for(int b = 0; b <t; b++) {
+		k = encoding[t-b-1];
+#ifdef VCACHED
+		(void)n;
+		if(k == 0) {
+			mpz_init(left);
+		} else {
+			mpz_set(left, *(*(*(cache +t-b-1)+s)+k-1 ));
+		}
+		mpz_set(right, *(*(*(cache +t-b-1)+s)+k));
+#else
+		rank(t-b, n, s, k-1, left);
+		rank(t-b, n, s, k, right);
+#endif
+		if( mpz_cmp(left,I)>0 ) { return -1; }
+		if( mpz_cmp(right,I)<=0 ) { return -1; }
+		s -= encoding[t-b-1];
 		mpz_sub(I,I,left);
 	}
-	return 0;
+	return 1;
 }
 
 #else
@@ -196,6 +230,17 @@ static void constantSumLen(const int32_t t, const int32_t n, const int32_t s,
 
 #ifdef CACHED
 static mpz_t cache[T-1][S+1];
+
+static void load_cache(const int32_t t, const int32_t n, const int32_t s)
+{
+	int b,z;
+	for(b = 1; b < t; b++) {
+		for(z = 0; z<=s; z++){
+			constantSumLen(b,n,z,cache[b-1][z]);
+		}
+	}
+
+}
 #endif
 
 /**
