@@ -9,7 +9,7 @@
 #define XMSS_MLEN 32
 
 #ifndef XMSS_SIGNATURES
-    #define XMSS_SIGNATURES 1000
+    #define XMSS_SIGNATURES 100
 #endif
 
 #ifdef XMSSMT
