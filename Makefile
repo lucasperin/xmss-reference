@@ -2,8 +2,8 @@ CC = /usr/bin/gcc -fopenmp
 CFLAGS = -Wall -g -O3 -Wextra -Wpedantic
 LDLIBS = -lcrypto
 
-SOURCES = params.c hash.c fips202.c hash_address.c randombytes.c wots.c xmss.c xmss_core.c xmss_commons.c utils.c
-HEADERS = params.h hash.h fips202.h hash_address.h randombytes.h wots.h xmss.h xmss_core.h xmss_commons.h utils.h
+SOURCES = params.c hash.c fips202.c hash_address.c randombytes.c wots.c xmss.c xmss_core.c xmss_commons.c utils.c constant_sum.c
+HEADERS = params.h hash.h fips202.h hash_address.h randombytes.h wots.h xmss.h xmss_core.h xmss_commons.h utils.h constant_sum.h
 
 SOURCES_FAST = $(subst xmss_core.c,xmss_core_fast.c,$(SOURCES))
 HEADERS_FAST = $(subst xmss_core.c,xmss_core_fast.c,$(HEADERS))
@@ -161,7 +161,7 @@ test/enc_bs: test/encoding_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 	$(CC) -DCONSTANTSUM -DBINARYSEARCH $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
 
 test/enc_bs_cached: test/encoding_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
-	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DBCACHED -DVCACHED $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
+	$(CC) -DCONSTANTSUM -DBINARYSEARCH -DBCACHED -DVCACHED -DVERIFY $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp
 
 test/enc_cky: test/encoding_speed.c $(SOURCES_FAST) $(OBJS) $(HEADERS_FAST)
 	$(CC) -DCONSTANTSUM -DCKY $(CFLAGS) -o $@ $(SOURCES_FAST) $< $(LDLIBS) -lgmp

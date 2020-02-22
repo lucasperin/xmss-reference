@@ -161,7 +161,7 @@ void wots_sign(const xmss_params *params,
     /* The WOTS+ private key is derived from the seed. */
     expand_seed(params, sig, seed);
 
-    for (i = 0; i < params->wots_len; i++) {
+	for (i = 0; i < params->wots_len; i++) {
         set_chain_addr(addr, i);
 #ifdef CONSTANTSUM
         gen_chain(params, sig + i*params->n, sig + i*params->n,
@@ -193,9 +193,10 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
 #ifdef VERIFY
 	short aux;
     for (i = 0; i < params->wots_len; i++) {
-		memcpy(&aux, sig + params->wots_len*params->n+ 2*i, 2);
+		memcpy(&aux, sig + params->wots_len*params->n + 2*i, 2);
 		lengths[i] = aux;
 	}
+
 	if(check_encoding(I, params->wots_len, params->wots_w, params->wots_s, lengths)){
 		return;
 	}

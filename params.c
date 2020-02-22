@@ -631,7 +631,7 @@ int xmss_xmssmt_initialize_params(xmss_params *params)
         return -1;
     }
     params->wots_len = params->wots_len1 + params->wots_len2;
-#if defined(CONSTANTSUM) && (VERIFY)
+#if defined(CONSTANTSUM) && defined(VERIFY)
     params->wots_sig_bytes = params->wots_len * params->n + params->wots_len*2;
 #else
     params->wots_sig_bytes = params->wots_len * params->n;

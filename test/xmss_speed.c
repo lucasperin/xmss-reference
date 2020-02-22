@@ -5,7 +5,7 @@
 #include "../xmss.h"
 #include "../params.h"
 #include "../randombytes.h"
-#include "../constant_sum.h"
+
 
 #define XMSS_MLEN 32
 
@@ -102,7 +102,6 @@ int main()
     XMSS_PARSE_OID(&params, oid);
 	
 #ifdef CONSTANTSUM
-	(void)check_encoding; //Surpress warning if not used
 	printf("##### CONSTANT SUM\n");
 	printf("##### PARAMS: t=%d n=%d s=%d\n", params.wots_len, params.wots_w, params.wots_s);
 #ifdef BINARYSEARCH
@@ -124,13 +123,14 @@ int main()
 	printf("##### rfc-XMSS \n ##### Params: t=%d n=%d\n", params.wots_len, params.wots_w);
 #endif
 
-#if defined(CACHED)
+#ifdef CACHED
 	load_cache(params.wots_len,params.wots_w,params.wots_s);
 #endif
 
 #if defined(BCACHED) || defined(VCACHED)
 	load_bcache(params.wots_len,params.wots_w,params.wots_s);
 #endif
+
 
     unsigned char pk[XMSS_OID_LEN + params.pk_bytes];
     unsigned char sk[XMSS_OID_LEN + params.sk_bytes];
@@ -174,7 +174,7 @@ int main()
 
     printf("Verifying %d signatures..\n", XMSS_SIGNATURES);
 
-	randombytes(m[0], XMSS_MLEN);
+	//randombytes(m[0], XMSS_MLEN);
     for (i = 0; i < XMSS_SIGNATURES; i++) {
         t[i] = cpucycles();
         ret |= XMSS_SIGN_OPEN(mout[i], &mlen, sm[i], smlen, pk);
