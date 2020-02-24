@@ -4,6 +4,28 @@
 #include <stdint.h>
 #include "params.h"
 
+#ifdef CONSTANTSUM
+#include "gmp.h"
+#ifndef T
+    #define T 67
+#endif
+#ifndef N
+    #define N 15
+#endif
+#ifndef S
+    #define S 400
+#endif
+
+void load_bcache(const int32_t t, const int32_t n, const int32_t s);
+void load_cache(const int32_t t, const int32_t n, const int32_t s);
+int check_encoding(mpz_t I, int32_t t, int32_t n, int32_t s, int *encoding);
+void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s, int *output);
+
+#endif
+
+
+
+
 /**
  * WOTS key generation. Takes a 32 byte seed for the private key, expands it to
  * a full WOTS private key and computes the corresponding public key.

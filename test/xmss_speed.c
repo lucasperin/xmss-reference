@@ -6,7 +6,6 @@
 #include "../params.h"
 #include "../randombytes.h"
 
-
 #define XMSS_MLEN 32
 
 #ifndef XMSS_SIGNATURES

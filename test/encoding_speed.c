@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "../constant_sum.h"
+#include "../wots.h"
 #include "../randombytes.h"
 
 #define MLEN 32
