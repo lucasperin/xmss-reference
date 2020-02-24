@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "utils.h"
 #include "hash.h"
@@ -240,7 +242,74 @@ void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s,
 #endif
 
 
+#ifdef ENC
+unsigned long long *t_enc_start;
+unsigned long long *t_enc_stop;
+int t_enc_idx = 0;
+unsigned long long *t_enc_start_v;
+unsigned long long *t_enc_stop_v;
+int t_enc_idx_v = 0;
 
+static unsigned long long enc_cpucycles(void)
+{
+  unsigned long long result;
+  __asm volatile(".byte 15;.byte 49;shlq $32,%%rdx;orq %%rdx,%%rax"
+    : "=a" (result) ::  "%rdx");
+  return result;
+}
+
+static int cmp_llu(const void *a, const void*b)
+{
+    if (*(unsigned long long *)a < *(unsigned long long *)b) return -1;
+    if (*(unsigned long long *)a > *(unsigned long long *)b) return 1;
+    return 0;
+}
+
+static unsigned long long median(unsigned long long *l, size_t llen)
+{
+    qsort(l, llen, sizeof(unsigned long long), cmp_llu);
+
+    if (llen % 2) return l[llen / 2];
+    else return (l[llen/2 - 1] + l[llen/2]) / 2;
+}
+
+static unsigned long long average(unsigned long long *t, size_t tlen)
+{
+    unsigned long long acc=0;
+    size_t i;
+    for(i = 0; i < tlen; i++) {
+        acc += t[i];
+    }
+    return acc/(tlen);
+}
+
+static void print_results(unsigned long long *t_start, unsigned long long *t_stop, size_t tlen)
+{
+  size_t i;
+  for (i = 0; i < tlen; i++) {
+    t_start[i] = t_stop[i] - t_start[i];
+  }
+  printf("\tmedian        : %llu cycles\n", median(t_start, tlen+1));
+  printf("\taverage       : %llu cycles\n", average(t_start, tlen));
+  printf("\n");
+}
+
+void init_enc(size_t len)
+{
+	t_enc_start = malloc(sizeof(unsigned long long) * len);
+	t_enc_stop = malloc(sizeof(unsigned long long) * len);
+	t_enc_start_v = malloc(sizeof(unsigned long long) * len);
+	t_enc_stop_v = malloc(sizeof(unsigned long long) * len);
+}
+void print_results_enc(size_t len)
+{
+	print_results(t_enc_start, t_enc_stop, len);
+}
+void print_results_enc_v(size_t len)
+{
+	print_results(t_enc_start_v, t_enc_stop_v, len);
+}
+#endif
 
 
 
@@ -398,14 +467,28 @@ void wots_sign(const xmss_params *params,
     uint32_t i;
 
 #ifdef CONSTANTSUM
+#ifdef ENC
+	t_enc_start[t_enc_idx] = enc_cpucycles();
+#endif
 	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
 	toConstantSum(I, params->wots_len, params->wots_w, params->wots_s, lengths);
 	mpz_clear(I);
+#ifdef ENC
+	t_enc_stop[t_enc_idx] = enc_cpucycles();
+	t_enc_idx++;
+#endif
 #ifdef VERIFY
 		short aux;
 #endif
 #else
+#ifdef ENC
+	t_enc_start[t_enc_idx] = enc_cpucycles();
+#endif
     chain_lengths(params, lengths, msg);
+#ifdef ENC
+	t_enc_stop[t_enc_idx] = enc_cpucycles();
+	t_enc_idx++;
+#endif
 #endif
 
     /* The WOTS+ private key is derived from the seed. */
@@ -441,6 +524,9 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
 #ifdef CONSTANTSUM
 	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
 #ifdef VERIFY
+#ifdef ENC
+	t_enc_start_v[t_enc_idx_v] = enc_cpucycles();
+#endif
 	short aux;
     for (i = 0; i < params->wots_len; i++) {
 		memcpy(&aux, sig + params->wots_len*params->n + 2*i, 2);
@@ -452,6 +538,10 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
 		return;
 	}
 	mpz_clear(I);
+#ifdef ENC
+	t_enc_stop_v[t_enc_idx_v] = enc_cpucycles();
+	t_enc_idx_v++;
+#endif
 #else
 	toConstantSum(I, params->wots_len, params->wots_w, params->wots_s, lengths);
 	mpz_clear(I);

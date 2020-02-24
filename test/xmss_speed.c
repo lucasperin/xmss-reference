@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include "../xmss.h"
+#include "../wots.h"
 #include "../params.h"
 #include "../randombytes.h"
 
@@ -130,6 +131,10 @@ int main()
 	load_bcache(params.wots_len,params.wots_w,params.wots_s);
 #endif
 
+#ifdef ENC
+	init_enc(XMSS_SIGNATURES);
+#endif
+
 
     unsigned char pk[XMSS_OID_LEN + params.pk_bytes];
     unsigned char sk[XMSS_OID_LEN + params.sk_bytes];
@@ -171,6 +176,11 @@ int main()
     }
     print_results(t, XMSS_SIGNATURES);
 
+#ifdef ENC
+    printf("\tEncoding cycles\n");
+    print_results_enc(XMSS_SIGNATURES);
+#endif
+
     printf("Verifying %d signatures..\n", XMSS_SIGNATURES);
 
 	//randombytes(m[0], XMSS_MLEN);
@@ -179,6 +189,13 @@ int main()
         ret |= XMSS_SIGN_OPEN(mout[i], &mlen, sm[i], smlen, pk);
     }
     print_results(t, XMSS_SIGNATURES);
+
+#ifdef VERIFY
+#ifdef ENC
+    printf("\t Verify Encoding cycles\n");
+    print_results_enc_v(XMSS_SIGNATURES);
+#endif
+#endif
 
     if (ret) {
         printf("DETECTED VERIFICATION ERRORS!\n");

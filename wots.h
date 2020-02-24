@@ -23,6 +23,12 @@ void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s, int *output);
 
 #endif
 
+#ifdef ENC
+void init_enc(size_t len);
+void print_results_enc(size_t len);
+void print_results_enc_v(size_t len);
+#endif
+
 
 
 

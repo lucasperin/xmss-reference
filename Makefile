@@ -1,4 +1,4 @@
-CC = /usr/bin/gcc -fopenmp
+CC = /usr/bin/gcc -fopenmp -DENC
 CFLAGS = -Wall -g -O3 -Wextra -Wpedantic
 LDLIBS = -lcrypto
 
