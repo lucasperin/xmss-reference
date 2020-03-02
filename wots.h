@@ -16,6 +16,16 @@
     #define S 400
 #endif
 
+
+#if defined(BCACHED) || defined(VCACHED)
+mpz_t bcache[T][S+1][N+1];
+#endif
+#ifdef CACHED
+mpz_t cache[T-1][S+1];
+#endif
+
+
+
 void load_bcache(const int32_t t, const int32_t n, const int32_t s);
 void load_cache(const int32_t t, const int32_t n, const int32_t s);
 int check_encoding(mpz_t I, int32_t t, int32_t n, int32_t s, int *encoding);

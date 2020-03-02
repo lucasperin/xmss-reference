@@ -20,10 +20,12 @@
  * Binomial coefficient n choose k for arbitrary precisions
  * integers, using GMP. Do not use uint, since it
  * may be called with negative values and return 0.
+ *
+ * MUST INIT out BEFORE CALLING binomial
  */
 static void binomial(int32_t n, int32_t k, mpz_t out)
 {
-	mpz_init(out);
+	mpz_set_ui(out,0);
 	if(n < k || n<0 || k<0)
 		return;
 	mpz_bin_uiui(out, n, k);
@@ -34,7 +36,7 @@ static void binomial(int32_t n, int32_t k, mpz_t out)
  * used to find bounds in the constant-sum encoding.
  */
 static void rank(int32_t t, int32_t n, int32_t s, int32_t j, mpz_t out) {
-	mpz_init(out);
+	mpz_set_ui(out,0);
 	int32_t aux = s/(n+1); //Floor of sum/(max+1)
 	int32_t k = (t < aux)? t : aux; //min(blocks,aux)
     int32_t i;
@@ -58,7 +60,6 @@ static void rank(int32_t t, int32_t n, int32_t s, int32_t j, mpz_t out) {
 }
 
 #if defined(BCACHED) || defined(VCACHED)
-mpz_t bcache[T][S+1][N+1];
 void load_bcache(const int32_t t, const int32_t n, const int32_t s)
 {
 	int b,z,j;
@@ -67,8 +68,8 @@ void load_bcache(const int32_t t, const int32_t n, const int32_t s)
 			#pragma omp parallel for
 			for(j = 0; j<= n; j++){
 				if(j<=z){
+					mpz_init(bcache[b][z][j]);
 					rank(b+1,n,z,j,bcache[b][z][j]);
-					//rank(b+1,n,z,j,*(*(*(bcache +b)+z)+j));
 				}
 			}
 		}
@@ -92,7 +93,7 @@ int check_encoding(mpz_t I, int32_t t, int32_t n, int32_t s,
 #ifdef VCACHED
 		(void)n;
 		if(k == 0) {
-			mpz_init(left);
+			mpz_set_ui(left, 0);
 		} else {
 			mpz_set(left, bcache[t-b-1][s][k-1]);
 		}
@@ -169,12 +170,12 @@ void toConstantSum(mpz_t I, int32_t t, int32_t n, int32_t s,
 static void constantSumLen(const int32_t t, const int32_t n, const int32_t s, 
 						   mpz_t out) 
 {
-	mpz_init(out);
+	mpz_set_ui(out,0);
 	int32_t aux = s/(n+1); //Floor of sum/(max+1)
 	int32_t k = (t < aux)? t : aux; //min(blocks,aux)
     int32_t i;
-	mpz_t a;
-	mpz_t b;
+	mpz_t a; mpz_init(a);
+	mpz_t b; mpz_init(b);
 	for(i = 0; i <= k; i++ ) {
 		binomial(t,i,a);
 		binomial(s-(n+1)*i+t-1,t-1, b);
@@ -184,18 +185,18 @@ static void constantSumLen(const int32_t t, const int32_t n, const int32_t s,
 			mpz_submul(out, a,b);
 		}
 	}
-			mpz_clear(a);
-			mpz_clear(b);
+	mpz_clear(a);
+	mpz_clear(b);
 }
 
 
 #ifdef CACHED
-mpz_t cache[T-1][S+1];
 void load_cache(const int32_t t, const int32_t n, const int32_t s)
 {
 	int b,z;
 	for(b = 1; b < t; b++) {
 		for(z = 0; z<=s; z++){
+			mpz_init(cache[b-1][z]);
 			constantSumLen(b,n,z,cache[b-1][z]);
 		}
 	}
