@@ -466,30 +466,23 @@ void wots_sign(const xmss_params *params,
 {
     int lengths[params->wots_len];
     uint32_t i;
-
-#ifdef CONSTANTSUM
 #ifdef ENC
 	t_enc_start[t_enc_idx] = enc_cpucycles();
 #endif
+
+#ifdef CONSTANTSUM
 	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
 	toConstantSum(I, params->wots_len, params->wots_w, params->wots_s, lengths);
 	mpz_clear(I);
-#ifdef ENC
-	t_enc_stop[t_enc_idx] = enc_cpucycles();
-	t_enc_idx++;
-#endif
 #ifdef VERIFY
 		short aux;
 #endif
 #else
-#ifdef ENC
-	t_enc_start[t_enc_idx] = enc_cpucycles();
-#endif
     chain_lengths(params, lengths, msg);
+#endif
 #ifdef ENC
 	t_enc_stop[t_enc_idx] = enc_cpucycles();
 	t_enc_idx++;
-#endif
 #endif
 
     /* The WOTS+ private key is derived from the seed. */
@@ -522,12 +515,13 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
 {
     int lengths[params->wots_len];
     uint32_t i;
-#ifdef CONSTANTSUM
-	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
-#ifdef VERIFY
 #ifdef ENC
 	t_enc_start_v[t_enc_idx_v] = enc_cpucycles();
 #endif
+#ifdef CONSTANTSUM
+	mpz_t I; mpz_init(I); mpz_import(I, params->n,1,1,0,0, msg);
+#ifdef VERIFY
+
 	short aux;
     for (i = 0; i < params->wots_len; i++) {
 		memcpy(&aux, sig + params->wots_len*params->n + 2*i, 2);
@@ -539,16 +533,16 @@ void wots_pk_from_sig(const xmss_params *params, unsigned char *pk,
 		return;
 	}
 	mpz_clear(I);
-#ifdef ENC
-	t_enc_stop_v[t_enc_idx_v] = enc_cpucycles();
-	t_enc_idx_v++;
-#endif
 #else
 	toConstantSum(I, params->wots_len, params->wots_w, params->wots_s, lengths);
 	mpz_clear(I);
 #endif
 #else
     chain_lengths(params, lengths, msg);
+#endif
+#ifdef ENC
+	t_enc_stop_v[t_enc_idx_v] = enc_cpucycles();
+	t_enc_idx_v++;
 #endif
 
     for (i = 0; i < params->wots_len; i++) {
