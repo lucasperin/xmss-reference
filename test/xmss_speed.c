@@ -190,11 +190,9 @@ int main()
     }
     print_results(t, XMSS_SIGNATURES);
 
-#ifdef VERIFY
 #ifdef ENC
     printf("\t Verify Encoding cycles\n");
     print_results_enc_v(XMSS_SIGNATURES);
-#endif
 #endif
 
     if (ret) {
