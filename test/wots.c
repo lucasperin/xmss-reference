@@ -6,26 +6,14 @@
 #include "../randombytes.h"
 #include "../params.h"
 
-#ifndef XMSS_VARIANT
-	#define XMSS_VARIANT "XMSS-SHA2_10_256"
-#endif
-
 int main()
 {
     xmss_params params;
     // TODO test more different OIDs
-    uint32_t oid;
+    uint32_t oid = 0x00000001;
 
-    if (xmss_str_to_oid(&oid, XMSS_VARIANT)) {
-        printf("XMSS variant %s not recognized!\n", XMSS_VARIANT);
-        return -1;
-    }
+    /* For WOTS it doesn't matter if we use XMSS or XMSSMT. */
     xmss_parse_oid(&params, oid);
-#ifdef CONSTANTSUM
-	printf("Params: t=%d n=%d s=%d\n", params.wots_len, params.wots_w, params.wots_s);
-#else
-	printf("Params: t=%d n=%d\n", params.wots_len, params.wots_w);
-#endif
 
     unsigned char seed[params.n];
     unsigned char pub_seed[params.n];
@@ -46,7 +34,7 @@ int main()
     wots_sign(&params, sig, m, seed, pub_seed, addr);
     wots_pk_from_sig(&params, pk2, sig, m, pub_seed, addr);
 
-    if (memcmp(pk1, pk2, params.wots_len*params.n)) {
+    if (memcmp(pk1, pk2, params.wots_sig_bytes)) {
         printf("failed!\n");
         return -1;
     }
