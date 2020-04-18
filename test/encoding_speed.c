@@ -64,13 +64,6 @@ int main()
 
 #if defined(CONSTANTSUM)
     int i;
-#ifdef CKYI
-	printf("CKYI t=%d s=%d\n", T,S);
-#else
-#ifdef CKY
-	(void)binomial;
-	printf("CKY t=%d s=%d\n", T,S);
-#else
 #ifdef BINARYSEARCH
 	(void)check_encoding; //Surpress warning if not used
 	printf("BS t=%d n=%d s=%d\n", T,N,S);
@@ -79,8 +72,6 @@ int main()
 	printf("MCS t=%d n=%d s=%d\n", T,N,S);
 #else
 	printf("CS t=%d n=%d s=%d\n", T,N,S);
-#endif
-#endif
 #endif
 #endif
 
