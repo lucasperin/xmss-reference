@@ -5,8 +5,6 @@ This repository is a fork of the original XMSS reference code. It contains modif
 
 ## XMSS reference code
 
-https://travis-ci.org/lucasperin/xmss-reference.svg?branch=master
-
 This repository contains the reference implementation that accompanies [RFC 8391: _"XMSS: eXtended Merkle Signature Scheme"_](https://tools.ietf.org/html/rfc8391).
 
 This reference implementation supports all parameter sets as defined in the RFC at run-time (specified by prefixing the public and private keys with a 32-bit `oid`). Implementations that want to use compile-time parameter sets can remove the `struct xmss_params` function parameter, and globally replace the use of its attributes by compile-time constants.
