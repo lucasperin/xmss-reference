@@ -65,7 +65,6 @@ void load_bcache(const int32_t t, const int32_t n, const int32_t s)
 	int b,z,j;
 	for(b = 0; b < t; b++) {
 		for(z = 0; z<=s; z++){
-			#pragma omp parallel for
 			for(j = 0; j<= n; j++){
 				if(j<=z){
 					mpz_init(bcache[b][z][j]);
