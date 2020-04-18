@@ -1,4 +1,11 @@
-## XMSS reference code [![Build Status](https://travis-ci.org/XMSS/xmss-reference.svg?branch=master)](https://travis-ci.org/XMSS/xmss-reference)
+
+[![Build Status](https://travis-ci.org/lucasperin/xmss-reference.svg?branch=master)](https://travis-ci.org/lucasperin/xmss-reference)
+
+This repository is a fork of the original XMSS reference code. It contains modifications that add a variant scheme option called Wots-cs. This variant reduces key generation for Wots and XMSS. The remaining of this file is kept unmodified from its original version.
+
+## XMSS reference code
+
+https://travis-ci.org/lucasperin/xmss-reference.svg?branch=master
 
 This repository contains the reference implementation that accompanies [RFC 8391: _"XMSS: eXtended Merkle Signature Scheme"_](https://tools.ietf.org/html/rfc8391).
 
