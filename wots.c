@@ -362,7 +362,13 @@ static void gen_chain(const xmss_params *params,
     memcpy(out, in, params->n);
 
     /* Iterate 'steps' calls to the hash function. */
-    for (i = start; i < (start+steps) && i < params->wots_w; i++) {
+#ifdef CONSTANTSUM
+	uint32_t limit = params->wots_w;
+#else
+	uint32_t limit = params->wots_w-1;
+#endif
+
+    for (i = start; i < (start+steps) && i <= limit; i++) {
         set_hash_addr(addr, i);
         thash_f(params, out, out, pub_seed, addr);
     }
